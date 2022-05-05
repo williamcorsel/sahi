@@ -1,6 +1,7 @@
 # OBSS SAHI Tool
 # Code written by Fatih C Akyon, 2020.
 
+import json
 import logging
 import os
 import time
@@ -413,6 +414,10 @@ def predict(
         )
         postprocess_type = "NMS"
         postprocess_match_metric = "IOU"
+
+    
+    if isinstance(model_category_remapping, str):
+        model_category_remapping = json.loads(model_category_remapping)
 
     # for profiling
     durations_in_seconds = dict()
