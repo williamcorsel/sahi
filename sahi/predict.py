@@ -11,7 +11,6 @@ from typing import Dict, List, Optional
 import numpy as np
 from tqdm import tqdm
 
-from sahi.model import DetectionModel
 from sahi.postprocess.combine import (
     GreedyNMMPostprocess,
     LSNMSPostprocess,
@@ -297,7 +296,6 @@ def get_sliced_prediction(
 
 
 def predict(
-    detection_model: DetectionModel = None,
     model_type: str = "mmdet",
     model_path: str = None,
     model_config_path: str = None,
@@ -335,10 +333,6 @@ def predict(
     Performs prediction for all present images in given folder.
 
     Args:
-        detection_model: sahi.model.DetectionModel
-            Optionally provide custom DetectionModel to be used for inference. When provided,
-            model_type, model_path, config_path, model_device, model_category_mapping, image_size
-            params will be ignored
         model_type: str
             mmdet for 'MmdetDetectionModel', 'yolov5' for 'Yolov5DetectionModel'.
         model_path: str
@@ -454,21 +448,19 @@ def predict(
 
     # init model instance
     time_start = time.time()
-    if detection_model is None:
-        model_class_name = MODEL_TYPE_TO_MODEL_CLASS_NAME[model_type]
-        DetectionModel = import_class(model_class_name)
-        detection_model = DetectionModel(
-            model_path=model_path,
-            config_path=model_config_path,
-            confidence_threshold=model_confidence_threshold,
-            device=model_device,
-            category_mapping=model_category_mapping,
-            category_remapping=model_category_remapping,
-            load_at_init=False,
-            image_size=image_size,
-        )
-        detection_model.load_model()
-        
+    model_class_name = MODEL_TYPE_TO_MODEL_CLASS_NAME[model_type]
+    DetectionModel = import_class(model_class_name)
+    detection_model = DetectionModel(
+        model_path=model_path,
+        config_path=model_config_path,
+        confidence_threshold=model_confidence_threshold,
+        device=model_device,
+        category_mapping=model_category_mapping,
+        category_remapping=model_category_remapping,
+        load_at_init=False,
+        image_size=image_size,
+    )
+    detection_model.load_model()
     time_end = time.time() - time_start
     durations_in_seconds["model_load"] = time_end
 
