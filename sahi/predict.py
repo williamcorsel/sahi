@@ -422,7 +422,7 @@ def predict(
         postprocess_match_metric = "IOU"
 
     
-    if isinstance(model_category_remapping, str):
+    if isinstance(model_category_remapping, str) and len(model_category_remapping) > 2:
         model_category_remapping = json.loads(model_category_remapping)
 
     # for profiling
@@ -450,6 +450,8 @@ def predict(
     pickle_dir = save_dir / "pickles"
     save_dir.mkdir(parents=True, exist_ok=True)  # make dir
 
+    
+
     # init model instance
     time_start = time.time()
     if detection_model is None:
@@ -466,6 +468,7 @@ def predict(
             image_size=image_size,
         )
         detection_model.load_model()
+        
     time_end = time.time() - time_start
     durations_in_seconds["model_load"] = time_end
 
