@@ -326,10 +326,12 @@ def visualize_object_predictions(
         colors = None
     # set rect_th for boxes
     rect_th = rect_th or max(round(sum(image.shape) / 2 * 0.001), 1)
-    # set text_th for category names
-    text_th = text_th or max(rect_th - 1, 1)
-    # set text_size for category names
-    text_size = text_size or rect_th / 3
+
+    if text_size > 0:
+        # set text_th for category names
+        text_th = text_th or max(rect_th - 1, 1)
+        # set text_size for category names
+        text_size = text_size or rect_th / 3
     # add bbox and mask to image if present
     for object_prediction in object_prediction_list:
         # deepcopy object_prediction_list so that original is not altered
@@ -359,22 +361,23 @@ def visualize_object_predictions(
             color=color,
             thickness=rect_th,
         )
-        # arange bounding box text location
-        label = f"{category_name} {score:.2f}"
-        w, h = cv2.getTextSize(label, 0, fontScale=text_size, thickness=text_th)[0]  # label width, height
-        outside = p1[1] - h - 3 >= 0  # label fits outside box
-        p2 = p1[0] + w, p1[1] - h - 3 if outside else p1[1] + h + 3
-        # add bounding box text
-        cv2.rectangle(image, p1, p2, color, -1, cv2.LINE_AA)  # filled
-        cv2.putText(
-            image,
-            label,
-            (p1[0], p1[1] - 2 if outside else p1[1] + h + 2),
-            0,
-            text_size,
-            (255, 255, 255),
-            thickness=text_th,
-        )
+        if text_size > 0:
+            # arange bounding box text location
+            label = f"{category_name} {score:.2f}"
+            w, h = cv2.getTextSize(label, 0, fontScale=text_size, thickness=text_th)[0]  # label width, height
+            outside = p1[1] - h - 3 >= 0  # label fits outside box
+            p2 = p1[0] + w, p1[1] - h - 3 if outside else p1[1] + h + 3
+            # add bounding box text
+            cv2.rectangle(image, p1, p2, color, -1, cv2.LINE_AA)  # filled
+            cv2.putText(
+                image,
+                label,
+                (p1[0], p1[1] - 2 if outside else p1[1] + h + 2),
+                0,
+                text_size,
+                (255, 255, 255),
+                thickness=text_th,
+            )
     if output_dir:
         # create output folder if not present
         Path(output_dir).mkdir(parents=True, exist_ok=True)
